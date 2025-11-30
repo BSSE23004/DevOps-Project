@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ./app/api
+      dockerfile: Dockerfile
+    container_name: study_api
+    environment:
+      - APP_VERSION=v1
+    restart: unless-stopped
+    networks:
+      - studies
+    ports:
+      - "5001:5000"      # optional for local testing outside compose
+
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+    container_name: study_frontend
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - studies
+    ports:
+      - "8080:80"
+    volumes:
+      - static-cache:/usr/share/nginx/html:ro
+    # If you want to mount local files during dev, uncomment:
+    # volumes:
+    #   - ./app/frontend/static:/usr/share/nginx/html:ro
+
+networks:
+  studies:
+    driver: bridge
+
+volumes:
+  static-cache:
